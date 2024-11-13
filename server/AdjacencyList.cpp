@@ -4,10 +4,20 @@
 #include <map>
 #include <iomanip>
 #include <string>
-#include <vector>
+#include <vector> 
 #include <unordered_set>
 using namespace std;
+struct Node{
+    double lon;
+    double lat; 
+    Node(double lon, double lat){
+        this->lon = lon;
+        this->lat = lat;
+    }
 
+
+
+};
 class AdjacencyList{
 
     private: 
