@@ -14,15 +14,18 @@ print(f"Nodes: {len(G_loaded.nodes)}, Edges: {len(G_loaded.edges)}")
 start_node = list(adj_list.keys())[0]  # random nodes
 end_node = list(adj_list.keys())[10]   
 def BFS(graph, start, end): 
-    q = queue.Queue() 
+    q = queue.Queue()  
+    
     q.put(start)
     visited = set()  
     visited.add(start)
     dist = queue.Queue()
     dist.put(0)
     while not q.empty():
-        curr = q.get()  
-        newd = dist.get()
+        curr = q.get()   
+        #print q to the map
+        newd = dist.get() 
+        #Fix distnace to be euclidean distance
         for neighbor in graph[curr]: 
             if neighbor == end:
                 return newd
