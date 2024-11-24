@@ -1,6 +1,7 @@
 import osmnx as ox
 import networkx as nx
 import queue
+import heapq
 """
 G = ox.graph_from_place('Miami, Florida, USA', network_type='drive')
 G1 = ox.graph_from_place('Miami, Florida, USA', network_type='walk')
@@ -37,5 +38,37 @@ def BFS(graph, start, end):
     return "no path"
 print(BFS(adj_list,start_node,end_node))
 
+def Dijsktra(graph, start, end):
+    minHeap = [(0,start,[])] # distance, source, currentPath
+    shortestPath = {} # keeps track of the shortest path to nodes
+    visitedNodes = set() # tracks visited nodes
 
- 
+    while minHeap:
+        currDistance, currNode, currPath = heapq.heappop(minHeap)
+        if (currNode in visitedNodes):
+            continue
+
+        visitedNodes.add(currNode)
+
+        currPath = currPath + [currNode]
+        shortestPath[currNode] = currDistance
+
+        if (currNode == end):
+            return currPath
+        
+        # going through the adjacent nodes of the current node
+        for adjacentNode in graph[currNode]:
+            if (adjacentNode not in visitedNodes):
+                # edge information
+                edge_data = graph[currNode][adjacentNode][0]
+                edgeDistance = edge_data.get('length')
+                heapq.heappush(minHeap, (currDistance + edgeDistance, adjacentNode, currPath))
+
+    return "no path found"
+
+path = Dijsktra(G_loaded, start_node, end_node)
+print(f"Dijsktra Path: {path}")
+
+#COMPARE DIJSKTRA WITH NETWORKS DIJSKTRA
+#nx_distance = nx.shortest_path_length(G_loaded, source=start_node, target=end_node, weight='length')
+#print(f"NetworkX Dijkstra Distance: {nx_distance}")
