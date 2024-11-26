@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MapContainer, TileLayer, Marker, Polyline, useMap } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css'; // Import the Leaflet CSS
+import { MapContainer, TileLayer, Marker, Polyline, useMap, CircleMarker } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css'; 
 import L from 'leaflet';
 import io from 'socket.io-client';
 
@@ -12,39 +12,39 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
 });
 
-// Connect to the WebSocket server
-const socket = io("http://localhost:5000");  // Ensure your Flask backend runs on this port
+const socket = io("http://localhost:5000");  
 
 function App() {
   const [selectedAlgorithm, setSelectedAlgorithm] = useState('');
-  const [destination, setDestination] = useState([25.7617, -80.1918]); // Miami, lat long
-  const [path, setPath] = useState([]);  // Store BFS path
-  const mapRef = useRef(); // To control map behavior
+  const [destination, setDestination] = useState([25.7617, -80.1918]); 
+  const [path, setPath] = useState([]);  
 
   const handleAlgorithmChange = (event) => {
     setSelectedAlgorithm(event.target.value);
   };
 
   async function startAlgorithm() {
+    console.log("starting algo with dest:", destination);
     if (!selectedAlgorithm) {
       alert('Choose an algorithm!');
       return;
     }
-
-    const [lat, lon] = destination;
+  
+    const [lat, lon] = destination; 
+  
     const data = {
       algorithm: selectedAlgorithm,
       end_lat: lat,
       end_lon: lon,
     };
-
+  
     try {
       const response = await fetch('http://localhost:5000/api/start_algorithm', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-
+  
       const result = await response.json();
       if (response.ok) {
         setPath([]);  // Clear previous paths
@@ -57,6 +57,8 @@ function App() {
       console.error(error);
     }
   }
+  
+  
 
   // Listen for socket data
   useEffect(() => {
@@ -80,13 +82,12 @@ function App() {
     };
   }, []);
 
-  // Center map to show updates
-  useEffect(() => {
-    if (path.length > 0 && mapRef.current) {
-      const lastCoord = path[path.length - 1];
-      mapRef.current.flyTo(lastCoord, 14);  // Fly to the latest BFS point
-    }
-  }, [path]);
+  // useEffect(() => {
+  //   if (path.length > 0 && mapRef.current) {
+  //     const lastCoord = path[path.length - 1];
+  //     mapRef.current.flyTo(lastCoord, 14);  // Fly to the latest BFS point
+  //   }
+  // }, [path]);
 
   return (
     <div className="relative h-screen w-screen">
@@ -118,7 +119,6 @@ function App() {
         style={{ height: '100vh', width: '100vw' }}
         scrollWheelZoom={true}
         zoomControl={false}
-        ref={mapRef}
       >
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -134,15 +134,21 @@ function App() {
               if (lat < 25.6 || lat > 25.9 || lng < -80.4 || lng > -80.0) {
                 alert('Marker is outside the allowed bounds of Miami!');
               } else {
-                setDestination([lat, lng]);
+                setDestination([lat, lng]);  
               }
             },
           }}
         />
-
-        {path.length > 1 && (
-          <Polyline positions={path} color="blue" />
-        )}
+        {path.map((coord, index) => (
+          <CircleMarker
+            key={index}
+            center={coord}
+            radius={1} 
+            color="blue"
+            fillColor="blue"
+            fillOpacity={1}
+          />
+        ))}
       </MapContainer>
     </div>
   );
