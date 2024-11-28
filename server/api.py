@@ -8,7 +8,7 @@ import heapq
 
 app = Flask(__name__)
 CORS(app) 
-socketio.init_app(app, cors_allowed_origins=["http://localhost:3000", "https://dsaproject-iota.vercel.app/"]) 
+socketio.init_app(app, cors_allowed_origins="*")
 
 @app.route('/api/start_algorithm', methods=['POST'])
 def start_algorithm():
