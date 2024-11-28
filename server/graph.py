@@ -29,6 +29,7 @@ def bfs(end_coords):
 
     while not q.empty():
         if stop_event.is_set(): 
+            print('event stopped')
             socketio.emit('bfs_complete', {'message': 'Algorithm was canceled.'})
             return
 
@@ -39,9 +40,11 @@ def bfs(end_coords):
 
         for neighbor in adj_list[curr]:
             if stop_event.is_set():  
+                print('thread is stopped')
                 socketio.emit('bfs_complete', {'message': 'Algorithm was canceled.'})
                 return
             if neighbor == end_node:
+                print('shortest path found')
                 prev[neighbor] = curr
                 path = []
                 while neighbor in prev:
