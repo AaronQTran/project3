@@ -35,7 +35,7 @@ def bfs(end_coords):
         curr = q.get() 
         curr_lat, curr_lon = G_loaded.nodes[curr]['y'], G_loaded.nodes[curr]['x']
         socketio.emit('bfs_update', {'current_coords': [curr_lat, curr_lon]})
-        socketio.sleep(0.001)
+        socketio.sleep(0.01)
 
         for neighbor in adj_list[curr]:
             if stop_event.is_set():  
@@ -82,7 +82,7 @@ def dijkstras(end_coords):
         
         curr_lat, curr_lon = G_loaded.nodes[curr_node]['y'], G_loaded.nodes[curr_node]['x']
         socketio.emit('bfs_update', {'current_coords': [curr_lat, curr_lon]})
-        socketio.sleep(0.001)  
+        socketio.sleep(0.01)  
 
         if curr_node == end_node:
             path_coords = [[G_loaded.nodes[node]['y'], G_loaded.nodes[node]['x']] for node in curr_path]
