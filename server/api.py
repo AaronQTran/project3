@@ -7,9 +7,9 @@ import threading
 import heapq
 
 app = Flask(__name__)
-CORS(app, resources={r"/api/*": {"origins": "*"}})  # Allow CORS for all API routes
+CORS(app, resources={r"/api/*": {"origins": "*"}})  
 
-socketio.init_app(app, cors_allowed_origins="*")  # Allow CORS for Socket.IO
+socketio.init_app(app, cors_allowed_origins="*")  
 
 @app.route('/api/start_algorithm', methods=['POST'])
 def start_algorithm():
@@ -54,4 +54,4 @@ def handle_stop_algorithm():
 
 if __name__ == '__main__':
     print("Server is running on port 5000")
-    socketio.run(app, debug=False, host='0.0.0.0', port=5000)  # Bind to all interfaces
+    socketio.run(app, debug=False, host='0.0.0.0', port=5000)  
