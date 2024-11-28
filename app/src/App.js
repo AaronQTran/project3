@@ -16,8 +16,15 @@ const socket = io("http://localhost:5000");
 
 function App() {
   const [selectedAlgorithm, setSelectedAlgorithm] = useState('');
-  const [destination, setDestination] = useState([25.7617, -80.1918]); 
+  const [destination, setDestination] = useState([25.8253124, -80.1947449]); 
   const [path, setPath] = useState([]);  
+  const [shortestPath, setShortestPath] = useState([]);
+  const [showMessage, setShowMessage] = useState(true);  
+  const [startPoint, setStartPoint] = useState([25.8253124, -80.1947449]);
+
+  const handleCloseMessage = () => {
+    setShowMessage(false);  
+  };
 
   const handleAlgorithmChange = (event) => {
     setSelectedAlgorithm(event.target.value);
@@ -25,12 +32,18 @@ function App() {
 
   async function startAlgorithm() {
     console.log("starting algo with dest:", destination);
+  
     if (!selectedAlgorithm) {
-      alert('Choose an algorithm!');
+      alert('Choose an algorithm bruh!');
       return;
     }
+
+    socket.emit('stop_algorithm');
+    
+    setPath([]);
+    setShortestPath([]);
   
-    const [lat, lon] = destination; 
+    const [lat, lon] = destination;
   
     const data = {
       algorithm: selectedAlgorithm,
@@ -47,10 +60,9 @@ function App() {
   
       const result = await response.json();
       if (response.ok) {
-        setPath([]);  // Clear previous paths
-        alert(result.message);
+        console.log(result.message); 
       } else {
-        alert(`Error: ${result.error}`);
+        console.log(result.error);
       }
     } catch (error) {
       alert('Failed to start algorithm. Please try again.');
@@ -59,38 +71,38 @@ function App() {
   }
   
   
-
-  // Listen for socket data
   useEffect(() => {
-    socket.on('bfs_update', (data) => {
-      setPath((prevPath) => [...prevPath, data.current_coords]);  // Add new coordinates to the path
+    socket.on('bfs_update', (data) => { //continues to listen despite running once
+      setPath((prevPath) => [...prevPath, data.current_coords]);  //add new coordinates to the path
     });
 
     socket.on('bfs_complete', (data) => {
-      if (data.message) {
-        alert(data.message);  // Handle "no path found"
-      } else {
-        setPath((prevPath) => [...prevPath, data.end_coords]);
-        alert(`Path found with distance: ${data.distance}`);
+      if (data.shortest_path) {
+        setShortestPath(data.shortest_path); 
+        console.log(`Path found with distance: ${data.distance}`);
       }
     });
 
-    // Cleanup the socket connection on component unmount
     return () => {
       socket.off('bfs_update');
       socket.off('bfs_complete');
+      socket.emit('stop_algorithm');
     };
   }, []);
 
-  // useEffect(() => {
-  //   if (path.length > 0 && mapRef.current) {
-  //     const lastCoord = path[path.length - 1];
-  //     mapRef.current.flyTo(lastCoord, 14);  // Fly to the latest BFS point
-  //   }
-  // }, [path]);
-
   return (
     <div className="relative h-screen w-screen">
+      {showMessage && (
+        <div className="absolute top-2 right-2 w-64 bg-white bg-opacity-95 p-4 rounded-lg shadow-md flex items-start space-x-2 z-[1000]">
+          <span className="text-gray-800">Welcome to Miami! Place the pin near the starting circle and select a traversal algorithm.</span>
+          <button 
+            onClick={handleCloseMessage}
+            className="text-orange-400 font-bold px-2 py-1 rounded hover:bg-gray-200 transition-colors"
+          >
+            X
+          </button>
+        </div>
+      )}
       <div className="absolute top-2 left-2 bg-white bg-opacity-95 p-4 rounded-lg shadow-md flex items-center space-x-4 z-[1000]">
         <label htmlFor="algorithm-select" className="text-lg font-medium">Choose an algorithm:</label>
         <select 
@@ -113,18 +125,18 @@ function App() {
 
       <MapContainer
         center={destination}
-        zoom={12}
-        minZoom={10}
-        maxZoom={16}
+        zoom={16}
+        minZoom={5}
+        maxZoom={20}
         style={{ height: '100vh', width: '100vw' }}
         scrollWheelZoom={true}
         zoomControl={false}
       >
         <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
+          url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+          attribution='&copy; Esri &mdash; Source: Esri, DigitalGlobe, GeoEye, Earthstar Geographics, CNES/Airbus DS, USDA, USGS, AEX, Getmapping, Aerogrid, IGN, IGP, swisstopo, and the GIS User Community'
         />
-        
+
         <Marker
           position={destination}
           draggable={true}
@@ -139,13 +151,28 @@ function App() {
             },
           }}
         />
+        <CircleMarker
+          center={startPoint}     
+          radius={10}             
+          color="purple"           
+          fillColor="transparent" 
+          weight={4}              
+        />
+        {shortestPath.length > 1 && ( //if true, do this&*
+          <Polyline
+            positions={shortestPath} 
+            color="green"           
+            weight={4}              
+          />
+        )}
+
         {path.map((coord, index) => (
           <CircleMarker
             key={index}
             center={coord}
-            radius={1} 
-            color="blue"
-            fillColor="blue"
+            radius={1.5} 
+            color={selectedAlgorithm === 'BFS' ? 'blue' : 'red'}
+            fillColor={selectedAlgorithm === 'BFS' ? 'blue' : 'red'}
             fillOpacity={1}
           />
         ))}
