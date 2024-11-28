@@ -7,8 +7,9 @@ import threading
 import heapq
 
 app = Flask(__name__)
-CORS(app) 
-socketio.init_app(app, cors_allowed_origins="*")
+CORS(app, resources={r"/api/*": {"origins": "*"}})  # Allow CORS for all API routes
+
+socketio.init_app(app, cors_allowed_origins="*")  # Allow CORS for Socket.IO
 
 @app.route('/api/start_algorithm', methods=['POST'])
 def start_algorithm():
@@ -27,11 +28,11 @@ def start_algorithm():
     end_coords = (end_lon, end_lat)
 
     if running_task and running_task.is_alive():
-        stop_event.set()  
-        running_task.join()  
-        stop_event.clear() 
+        stop_event.set()
+        running_task.join()
+        stop_event.clear()
 
-    #start the new task
+    # Start the new task
     running_algorithm = algorithm
     if algorithm == "BFS":
         running_task = threading.Thread(target=bfs, args=(end_coords,))
@@ -47,10 +48,10 @@ def start_algorithm():
 def handle_stop_algorithm():
     global stop_event, running_task
     if running_task and running_task.is_alive():
-        stop_event.set()  
-        running_task.join() 
-        stop_event.clear() 
-        
+        stop_event.set()
+        running_task.join()
+        stop_event.clear()
+
 if __name__ == '__main__':
     print("Server is running on port 5000")
-    socketio.run(app, debug=False, port=5000)
+    socketio.run(app, debug=False, host='0.0.0.0', port=5000)  # Bind to all interfaces
