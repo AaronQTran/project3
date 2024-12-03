@@ -15,6 +15,6 @@ REQUIREMENTS: you must have Node.js installed to run the react-app
    to be on.
 
 
-pip installs for backend server terminal: pip install flask, pip install flask-cors, pip install flask socket-io, pip install osmnx, pip install sckit-learn
+pip installs for backend server terminal: pip install flask, pip install flask-cors, pip install flask socket-io, pip install osmnx, pip install scikit-learn
 
 npm installs for frontend app: simply run npm i 
