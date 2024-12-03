@@ -21,7 +21,7 @@ function App() {
   const [shortestPath, setShortestPath] = useState([]);
   const [showMessage, setShowMessage] = useState(true);  
   const [startPoint, setStartPoint] = useState([25.8253124, -80.1947449]);
-
+  const [activeAlgorithm, setActiveAlgorithm] = useState('');
   const handleCloseMessage = () => {
     setShowMessage(false);  
   };
@@ -39,7 +39,8 @@ function App() {
     }
 
     socket.emit('stop_algorithm');
-    
+
+    setActiveAlgorithm(selectedAlgorithm);
     setPath([]);
     setShortestPath([]);
   
@@ -171,8 +172,8 @@ function App() {
             key={index}
             center={coord}
             radius={1.5} 
-            color={selectedAlgorithm === 'BFS' ? 'blue' : 'red'}
-            fillColor={selectedAlgorithm === 'BFS' ? 'blue' : 'red'}
+            color={activeAlgorithm === 'BFS' ? 'blue' : 'red'} 
+            fillColor={activeAlgorithm === 'BFS' ? 'blue' : 'red'} 
             fillOpacity={1}
           />
         ))}

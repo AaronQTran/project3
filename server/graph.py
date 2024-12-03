@@ -24,6 +24,7 @@ def bfs(end_coords):
     q = queue.Queue()
     q.put(start_node)
     visited = set()
+    print(end_node)
     visited.add(start_node)
     prev = {}
 
