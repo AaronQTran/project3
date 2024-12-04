@@ -12,20 +12,24 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
 });
 
+//connect to socket
 const socket = io("http://localhost:5000");  
 
 function App() {
+  //react usestates
   const [selectedAlgorithm, setSelectedAlgorithm] = useState('');
   const [destination, setDestination] = useState([25.8253124, -80.1947449]); 
   const [path, setPath] = useState([]);  
   const [shortestPath, setShortestPath] = useState([]);
   const [showMessage, setShowMessage] = useState(true);  
   const [startPoint, setStartPoint] = useState([25.8253124, -80.1947449]);
-  const [activeAlgorithm, setActiveAlgorithm] = useState('');
+  const [activeAlgorithm, setActiveAlgorithm] = useState(''); //real algorithm state, permanance 
+
   const handleCloseMessage = () => {
     setShowMessage(false);  
   };
 
+  //temporary algorithm change
   const handleAlgorithmChange = (event) => {
     setSelectedAlgorithm(event.target.value);
   };
@@ -40,6 +44,7 @@ function App() {
 
     socket.emit('stop_algorithm');
 
+    //reset everything
     setActiveAlgorithm(selectedAlgorithm);
     setPath([]);
     setShortestPath([]);
@@ -71,7 +76,7 @@ function App() {
     }
   }
   
-  
+  //socket reads
   useEffect(() => {
     socket.on('bfs_update', (data) => { //continues to listen despite running once
       setPath((prevPath) => [...prevPath, data.current_coords]);  //add new coordinates to the path
@@ -84,6 +89,7 @@ function App() {
       }
     });
 
+    //reset everything,
     return () => {
       socket.off('bfs_update');
       socket.off('bfs_complete');

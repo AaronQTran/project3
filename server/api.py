@@ -11,6 +11,7 @@ CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 socketio.init_app(app, cors_allowed_origins="*")  
 
+#start algo, explainatory 
 @app.route('/api/start_algorithm', methods=['POST'])
 def start_algorithm():
     global running_task, running_algorithm, stop_event
@@ -18,6 +19,7 @@ def start_algorithm():
     if not data:
         return jsonify({"error": "Invalid JSON"}), 400
 
+    #eventually conver to lon lat
     algorithm = data.get('algorithm')
     end_lat = data.get('end_lat')
     end_lon = data.get('end_lon')
@@ -32,7 +34,7 @@ def start_algorithm():
         running_task.join()
         stop_event.clear()
 
-    # Start the new task
+    #start the new task
     running_algorithm = algorithm
     if algorithm == "BFS":
         running_task = threading.Thread(target=bfs, args=(end_coords,))
@@ -52,6 +54,7 @@ def handle_stop_algorithm():
         running_task.join()
         stop_event.clear()
 
+#open to all ports
 if __name__ == '__main__':
     print("Server is running on port 5000")
     socketio.run(app, debug=False, host='0.0.0.0', port=5000)  

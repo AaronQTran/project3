@@ -10,6 +10,7 @@ adj_list = nx.to_dict_of_lists(G_loaded)
 
 start_node = list(adj_list.keys())[0]  
 
+#MUST HAVE SCIKIT-LEARN INSTALLED
 def find_nearest_node(lon, lat):
     try:
         nearest_node = ox.distance.nearest_nodes(G_loaded, lon, lat)
@@ -37,14 +38,14 @@ def bfs(end_coords):
         curr = q.get() 
         curr_lat, curr_lon = G_loaded.nodes[curr]['y'], G_loaded.nodes[curr]['x']
         socketio.emit('bfs_update', {'current_coords': [curr_lat, curr_lon]})
-        socketio.sleep(0.01)
+        socketio.sleep(0.01) #to slow down algorithm
 
         for neighbor in adj_list[curr]:
             if stop_event.is_set():  
                 print('thread is stopped')
                 socketio.emit('bfs_complete', {'message': 'Algorithm was canceled.'})
                 return
-            if neighbor == end_node:
+            if neighbor == end_node: #ending
                 print('shortest path found')
                 prev[neighbor] = curr
                 path = []
@@ -61,6 +62,7 @@ def bfs(end_coords):
 
     socketio.emit('bfs_complete', {'message': 'No path found.'})
 
+#dijkstras here
 def dijkstras(end_coords):
     global stop_event
     
@@ -86,7 +88,7 @@ def dijkstras(end_coords):
         
         curr_lat, curr_lon = G_loaded.nodes[curr_node]['y'], G_loaded.nodes[curr_node]['x']
         socketio.emit('bfs_update', {'current_coords': [curr_lat, curr_lon]})
-        socketio.sleep(0.01)  
+        socketio.sleep(0.01)  #slow it down
 
         if curr_node == end_node:
             path_coords = [[G_loaded.nodes[node]['y'], G_loaded.nodes[node]['x']] for node in curr_path]
